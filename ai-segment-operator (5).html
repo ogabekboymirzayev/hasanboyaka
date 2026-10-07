@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI SEGMENT — Sotuvchi Operatorlar Skripti va CRM Boshqaruv Paneli</title>
+  <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .sr-toggle {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* Theme CSS Variables (Light default, Dark when #theme-toggle:checked or html.dark) */
+  .theme-root {
+    --bg-page: #F8F8F5;
+    --bg-card: #FFFFFF;
+    --bg-subtle: #F1F2EE;
+    --bg-topbar: rgba(248, 248, 245, 0.96);
+    --text-main: #111814;
+    --text-muted: #57534E;
+    --text-faint: #6B7280;
+    --border-color: #E2E4DF;
+    --accent: #14422C;
+    --accent-btn: #14422C;
+    --accent-text: #14422C;
+    --danger-bg: #FEF2F2;
+    --danger-border: #FECACA;
+    --danger-text: #991B1B;
+    --highlight-cell: rgba(20, 66, 44, 0.06);
+
+    min-height: 100vh;
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    transition: background-color 0.18s ease, color 0.18s ease;
+  }
+
+  #theme-toggle:checked ~ .theme-root,
+  html.dark .theme-root,
+  .theme-root.dark {
+    --bg-page: #0B110E;
+    --bg-card: #121B16;
+    --bg-subtle: #17231C;
+    --bg-topbar: rgba(11, 17, 14, 0.96);
+    --text-main: #ECF3EE;
+    --text-muted: #A8B6AE;
+    --text-faint: #84968C;
+    --border-color: #1F3328;
+    --accent: #34D399;
+    --accent-btn: #059669;
+    --accent-text: #34D399;
+    --danger-bg: rgba(127, 29, 29, 0.25);
+    --danger-border: rgba(248, 113, 113, 0.35);
+    --danger-text: #FCA5A5;
+    --highlight-cell: rgba(52, 211, 153, 0.1);
+  }
+
+  .theme-txt-light { display: none; }
+  .theme-txt-dark { display: inline; }
+  #theme-toggle:checked ~ .theme-root .theme-txt-light,
+  html.dark .theme-root .theme-txt-light { display: inline; }
+  #theme-toggle:checked ~ .theme-root .theme-txt-dark,
+  html.dark .theme-root .theme-txt-dark { display: none; }
+
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; height: auto; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 18px; }
+  .topbar {
+    position: sticky; top: 0; z-index: 40;
+    background: var(--bg-topbar);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 12px 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  }
+  .brand {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-weight: 800; font-size: 16px; letter-spacing: -0.02em; color: var(--text-main);
+  }
+  .brand-dot {
+    width: 10px; height: 10px; border-radius: 999px; background: var(--accent); display: inline-block;
+  }
+  .nav-links {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 13px; font-weight: 600; color: var(--text-muted);
+  }
+  .nav-links a:hover { color: var(--accent-text); }
+
+  .btn-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 9px 15px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    border: 1px solid transparent; cursor: pointer; text-decoration: none;
+    transition: transform 0.1s ease, opacity 0.1s ease, background-color 0.15s ease;
+    white-space: nowrap; user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active {
+    transform: scale(0.97);
+    opacity: 0.85;
+  }
+  .btn-primary {
+    background-color: var(--accent-btn); color: #FFFFFF !important; border-color: var(--accent-btn);
+  }
+  .btn-outline {
+    background-color: var(--bg-card); color: var(--text-main); border-color: var(--border-color);
+  }
+  .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 10px; }
+
+  .section { padding: 44px 0; border-bottom: 1px solid var(--border-color); }
+
+  .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent-text); margin-bottom: 6px; display: block;
+  }
+  .h1 {
+    font-size: clamp(26px, 4.5vw, 50px);
+    font-weight: 800; line-height: 1.08; letter-spacing: -0.025em; margin-bottom: 14px; color: var(--text-main);
+  }
+  .h2 {
+    font-size: clamp(21px, 3vw, 34px);
+    font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 8px; color: var(--text-main);
+  }
+  .h3 { font-size: 18px; font-weight: 700; line-height: 1.25; margin-bottom: 6px; color: var(--text-main); }
+  .serif-italic {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic; font-weight: 400; color: var(--accent-text);
+  }
+  .lead { font-size: 15px; line-height: 1.65; color: var(--text-muted); max-width: 65ch; }
+  .text-muted { color: var(--text-muted); }
+  .text-faint { color: var(--text-faint); }
+  .accent-text { color: var(--accent-text); }
+  .divider-top { border-top: 1px solid var(--border-color); }
+  .divider-bottom { border-bottom: 1px solid var(--border-color); }
+  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  .hero-grid {
+    display: grid; grid-template-columns: 1fr; gap: 28px; align-items: center;
+  }
+  @media (min-width: 960px) {
+    .hero-grid { grid-template-columns: 7fr 5fr; gap: 36px; }
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  @media (min-width: 640px) {
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1024px) {
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; overflow: hidden;
+  }
+  .card-featured { border: 2px solid var(--accent); }
+  .card-pad { padding: 18px; }
+  .subtle-box {
+    background: var(--bg-subtle); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px;
+  }
+  .danger-box {
+    background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger-text); border-radius: 14px; padding: 18px;
+  }
+
+  .showcase-frame {
+    position: relative; aspect-ratio: 16 / 10; background: #0F291E; overflow: hidden;
+  }
+  .showcase-frame img { width: 100%; height: 100%; object-fit: cover; }
+  .showcase-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.86) 0%, rgba(0,0,0,0.28) 55%, transparent 100%);
+    display: flex; flex-direction: column; justify-content: flex-end; padding: 16px; color: #FFFFFF;
+  }
+  .hero-slide-item { display: none; width: 100%; height: 100%; position: relative; }
+  #hero-slide-0:checked ~ .theme-root .hero-slide-item-0,
+  #hero-slide-1:checked ~ .theme-root .hero-slide-item-1,
+  #hero-slide-2:checked ~ .theme-root .hero-slide-item-2,
+  #hero-slide-3:checked ~ .theme-root .hero-slide-item-3 {
+    display: block;
+  }
+  .thumb-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    padding: 10px; background: var(--bg-subtle); border-top: 1px solid var(--border-color);
+  }
+  .thumb-btn {
+    border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;
+    background: var(--bg-card); cursor: pointer; text-align: left; padding: 0; color: var(--text-main);
+    display: block;
+  }
+  #hero-slide-0:checked ~ .theme-root .thumb-btn-0,
+  #hero-slide-1:checked ~ .theme-root .thumb-btn-1,
+  #hero-slide-2:checked ~ .theme-root .thumb-btn-2,
+  #hero-slide-3:checked ~ .theme-root .thumb-btn-3 {
+    border: 2px solid var(--accent);
+  }
+  #hero-slide-0:checked ~ .theme-root .thumb-btn-0 .thumb-label,
+  #hero-slide-1:checked ~ .theme-root .thumb-btn-1 .thumb-label,
+  #hero-slide-2:checked ~ .theme-root .thumb-btn-2 .thumb-label,
+  #hero-slide-3:checked ~ .theme-root .thumb-btn-3 .thumb-label {
+    background: var(--accent-btn); color: #FFFFFF;
+  }
+  .thumb-img { aspect-ratio: 16 / 10; width: 100%; object-fit: cover; }
+  .thumb-label {
+    font-size: 11px; font-weight: 700; padding: 5px 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .gallery-img-wrap { position: relative; aspect-ratio: 4 / 3; background: #0F291E; overflow: hidden; }
+  .gallery-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .badge-dark {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(0,0,0,0.75); color: #FFFFFF;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
+    padding: 4px 8px; border-radius: 6px;
+  }
+
+  .tariff-img-wrap { position: relative; aspect-ratio: 16 / 9; background: #0F291E; overflow: hidden; }
+  .tariff-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .tariff-img-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 65%);
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 12px 16px; color: #FFFFFF; font-size: 12px; font-weight: 600;
+  }
+
+  .price-big {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 25px; font-weight: 800; color: var(--text-main); margin: 6px 0 2px;
+  }
+  .check-list { list-style: none; margin: 12px 0; padding: 0; }
+  .check-list li {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 13px; line-height: 1.45; margin-bottom: 8px; color: var(--text-muted);
+  }
+  .check-icon { color: var(--accent-text); font-weight: 800; flex-shrink: 0; }
+
+  .table-wrap {
+    width: 100%; overflow-x: auto; background: var(--bg-card);
+    border: 1px solid var(--border-color); border-radius: 14px;
+  }
+  table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+  th, td { padding: 11px 13px; border-bottom: 1px solid var(--border-color); vertical-align: middle; color: var(--text-main); }
+  th {
+    background: var(--bg-subtle); font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700;
+  }
+
+  .input, .select {
+    width: 100%; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); font-size: 14px;
+  }
+
+  /* Single Source of Truth for Modal Open/Close: #modal-toggle:checked */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 60;
+    background: rgba(0, 0, 0, 0.68);
+    display: none; align-items: center; justify-content: center; padding: 16px;
+  }
+  #modal-toggle:checked ~ .theme-root .modal-backdrop {
+    display: flex !important;
+  }
+
+  .modal-box {
+    background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
+    max-width: 440px; width: 100%; padding: 22px; color: var(--text-main);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Single Source of Truth for Modal Form vs Confirmation: #modal-submit-toggle:checked */
+  #modalFormBox { display: block; }
+  #modalSuccessBox { display: none; }
+  #modal-submit-toggle:checked ~ .theme-root #modalFormBox {
+    display: none !important;
+  }
+  #modal-submit-toggle:checked ~ .theme-root #modalSuccessBox {
+    display: block !important;
+  }
+
+  /* Single Source of Truth for Inline Form vs Confirmation: #inline-submit-toggle:checked */
+  #inlineForm { display: block; }
+  #inlineSuccess { display: none; }
+  #inline-submit-toggle:checked ~ .theme-root #inlineForm {
+    display: none !important;
+  }
+  #inline-submit-toggle:checked ~ .theme-root #inlineSuccess {
+    display: block !important;
+  }
+
+  details.faq-item {
+    background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
+    padding: 14px 18px; margin-bottom: 10px;
+  }
+  details.faq-item summary {
+    font-weight: 700; font-size: 14px; cursor: pointer; list-style: none;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--text-main);
+  }
+  details.faq-item p {
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);
+    font-size: 13px; color: var(--text-muted); line-height: 1.6;
+  }
+</style>
+<style>
+  /* Real-time toast notification & highlight */
+  @keyframes highlightRow {
+    0% { background-color: rgba(52, 211, 153, 0.4); transform: scale(1.01); }
+    100% { background-color: transparent; transform: scale(1); }
+  }
+  .row-new {
+    animation: highlightRow 3s ease-out;
+  }
+  .badge-new {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #059669;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(0.96); }
+  }
+  .live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #059669;
+    background: rgba(5, 150, 105, 0.1);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(5, 150, 105, 0.2);
+  }
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #059669;
+    animation: pulse 1.2s infinite;
+  }
+  .toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+  }
+  .toast-msg {
+    pointer-events: auto;
+    background: #111814;
+    color: #FFFFFF;
+    border: 1px solid #34D399;
+    border-radius: 10px;
+    padding: 12px 18px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease-out;
+  }
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .btn-del {
+    background: transparent;
+    border: 1px solid var(--danger-border);
+    color: var(--danger-text);
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-del:hover {
+    background: var(--danger-bg);
+  }
+  .btn-call {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(5, 150, 105, 0.12);
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.3);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+    margin-right: 4px;
+  }
+  .btn-call:hover {
+    background: #059669;
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+  <input type="checkbox" id="theme-toggle" class="sr-toggle" onchange="syncThemeFromCheckbox(this.checked)" />
+
+  <div class="theme-root" id="themeRoot">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <span class="brand-dot"></span>
+          <span>AI SEGMENT · SOTUV VA CRM PANELI</span>
+        </div>
+        <div class="btn-row">
+          <label for="theme-toggle" class="btn btn-outline">
+            <span>🌓</span>
+            <span class="theme-txt-dark">Qorong‘u fon</span>
+            <span class="theme-txt-light">Yorug‘ fon</span>
+          </label>
+          <a href="#skript" class="btn btn-outline">Universal Skript</a>
+          <a href="#crm" class="btn btn-primary">CRM Ro‘yxat (<span id="topCrmCount">7</span>)</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- 1. RULES & RED LINES -->
+      <section class="section">
+        <div style="margin-bottom:16px;">
+          <span class="kicker">ASOSIY SOTUV QOIDALARI (4 TA OLTIN QOIDA)</span>
+          <h2 class="h2" style="font-size:24px;">Har bir suhbatda amal qilinadigan qoidalar</h2>
+        </div>
+        <div class="grid-4" style="margin-bottom:18px;">
+          
+    <div class="card card-pad" style="border-top:3px solid var(--accent);">
+      <span class="kicker">01-QOIDA</span>
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Avval savol, keyin taklif</div>
+      <p class="text-muted" style="font-size:12px;line-height:1.5;">Mijozga 2–3 ta aniqlashtiruvchi savol bermasdan turib hech qachon tarif va narx aytilmaydi.</p>
+    </div>
+    <div class="card card-pad" style="border-top:3px solid var(--accent);">
+      <span class="kicker">02-QOIDA</span>
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Bitta asosiy tarif tavsiya qilamiz</div>
+      <p class="text-muted" style="font-size:12px;line-height:1.5;">Mijozning maqsadiga aniq mos bitta tarifni tavsiya qilamiz; ikkinchi tarif faqat muqobil sifatida aytiladi.</p>
+    </div>
+    <div class="card card-pad" style="border-top:3px solid var(--accent);">
+      <span class="kicker">03-QOIDA</span>
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Faqat rost va’da beramiz</div>
+      <p class="text-muted" style="font-size:12px;line-height:1.5;">Aniq daromad summasi, sertifikat yoki “100% kafolat” haqida hech qachon yolg‘on va’da berilmaydi.</p>
+    </div>
+    <div class="card card-pad" style="border-top:3px solid var(--accent);">
+      <span class="kicker">04-QOIDA</span>
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Har bir javob CTA bilan tugaydi</div>
+      <p class="text-muted" style="font-size:12px;line-height:1.5;">Suhbat osilib qolmasligi uchun har javob so‘ngida aniq keyingi qadam bo‘ladi: “Ma’lumotlaringizni yuborsangiz, to‘lov yo‘riqnomasini jo‘nataman”.</p>
+    </div>
+        </div>
+        <div class="danger-box">
+          <span class="kicker" style="color:inherit;">QAT’IY TAQIQLANGAN VA’DALAR (QIZIL CHIZIQ)</span>
+          <ul style="list-style:none;padding:0;margin:0;">
+            <li style="margin-bottom:6px;font-size:12px;">× “Kurs tugagach aniq pul ishlaysiz” yoki aniq daromad summasini va’da qilish.</li><li style="margin-bottom:6px;font-size:12px;">× “Sertifikat beramiz” deyish — sertifikat berilmaydi, asosiy e’tibor amaliy ko‘nikmada.</li><li style="margin-bottom:6px;font-size:12px;">× “Barcha AI dasturlar to‘liq bepul” deyish — ayrim servislarning obunalari alohida pullik bo‘lishi mumkin.</li><li style="margin-bottom:6px;font-size:12px;">× “Kursdan keyin doimiy buyurtma bilan ta’minlaymiz” deyish — doimiy buyurtma kafolatlanmaydi.</li><li style="margin-bottom:6px;font-size:12px;">× Mijozga ehtiyoji bo‘lmagan yuqori (qimmat) tarifni majburlab tiqishtirish.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 2. UNIVERSAL SCRIPT & OBJECTIONS -->
+      <section id="skript" class="section">
+        <div class="hero-grid" style="align-items:start;">
+          <div>
+            <span class="kicker">UNIVERSAL SOTUV SKRIPTI (TAHRIRLANMAYDIGAN TAYYOR MATNLAR)</span>
+            <h2 class="h2" style="font-size:24px;margin-bottom:14px;">Bosqichma-bosqich Suhbat Skripti</h2>
+            
+    <div class="card card-pad" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;font-size:14px;">1. Salomlashuv</div>
+          <div class="text-faint" style="font-size:11px;">Mijoz murojaat qilishi bilan yuboriladigan universal salomlashuv</div>
+        </div>
+        <button type="button" onclick="copyText(this, decodeURIComponent('Assalomu%20alaykum!%20AI%20SEGMENT%E2%80%99dan%20yozyapman.%20Siz%20AI%20kursi%20haqida%20so%E2%80%98ragan%20edingiz.%20Sizga%20mos%20dasturni%20tanlashda%20yordam%20beraman%20%E2%80%94%202%20ta%20qisqa%20savol%20bersam%20maylimi%3F'))" class="btn btn-outline" style="padding:6px 12px;font-size:12px;">
+          Nusxa olish
+        </button>
+      </div>
+      <div class="subtle-box" style="font-size:13px;white-space:pre-line;line-height:1.55;">Assalomu alaykum! AI SEGMENT’dan yozyapman. Siz AI kursi haqida so‘ragan edingiz. Sizga mos dasturni tanlashda yordam beraman — 2 ta qisqa savol bersam maylimi?</div>
+    </div>
+    <div class="card card-pad" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;font-size:14px;">2. Ehtiyojni aniqlash (3 savol)</div>
+          <div class="text-faint" style="font-size:11px;">1-qoida: 2–3 ta savolsiz tarif va narx aytilmaydi</div>
+        </div>
+        <button type="button" onclick="copyText(this, decodeURIComponent('1)%20AI%20bilan%20hozir%20tanishmisiz%20yoki%20ilgari%20ishlaganmisiz%3F%0A2)%20AI%E2%80%99ni%20nima%20uchun%20o%E2%80%98rganmoqchisiz%3A%20o%E2%80%98zingiz%20uchun%2C%20Instagram%2FTelegram%20uchun%20yoki%20xizmat%20sifatida%20ishlash%20uchunmi%3F%0A3)%20Qaysi%20qurilmada%20ishlaysiz%20%E2%80%94%20telefon%20yoki%20kompyuter%3F'))" class="btn btn-outline" style="padding:6px 12px;font-size:12px;">
+          Nusxa olish
+        </button>
+      </div>
+      <div class="subtle-box" style="font-size:13px;white-space:pre-line;line-height:1.55;">1) AI bilan hozir tanishmisiz yoki ilgari ishlaganmisiz?
+2) AI’ni nima uchun o‘rganmoqchisiz: o‘zingiz uchun, Instagram/Telegram uchun yoki xizmat sifatida ishlash uchunmi?
+3) Qaysi qurilmada ishlaysiz — telefon yoki kompyuter?</div>
+    </div>
+    <div class="card card-pad" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;font-size:14px;">3A. Tavsiya va Narx — STANDART (149 000 so‘m)</div>
+          <div class="text-faint" style="font-size:11px;">AI’ni endi sinab ko‘rmoqchi, o‘zi uchun rasm va qisqa video xohlagan mijozga</div>
+        </div>
+        <button type="button" onclick="copyText(this, decodeURIComponent('Aytganlaringizga%20ko%E2%80%98ra%20sizga%20Standart%20tarifi%20mos%3A%2010%20kunlik%20amaliy%20online%20dasturda%20AI%20va%20prompt%20asoslari%2C%20rasm%20tayyorlash%2C%20suratni%20jonlantirish%2C%20qisqa%20AI%20video%20hamda%20Instagram%2FTelegram%20uchun%20kontent%20qilishni%20noldan%20o%E2%80%98rganasiz.%0A%0AStandart%20narxi%20%E2%80%94%20149%20000%20so%E2%80%98m.%20Eslatib%20o%E2%80%98tay%3A%20AI%20servislarning%20obunalari%20narxga%20avtomatik%20kirmaydi%2C%20kursda%20imkon%20qadar%20qulay%20vositalar%20ko%E2%80%98rsatiladi.'))" class="btn btn-outline" style="padding:6px 12px;font-size:12px;">
+          Nusxa olish
+        </button>
+      </div>
+      <div class="subtle-box" style="font-size:13px;white-space:pre-line;line-height:1.55;">Aytganlaringizga ko‘ra sizga Standart tarifi mos: 10 kunlik amaliy online dasturda AI va prompt asoslari, rasm tayyorlash, suratni jonlantirish, qisqa AI video hamda Instagram/Telegram uchun kontent qilishni noldan o‘rganasiz.
+
+Standart narxi — 149 000 so‘m. Eslatib o‘tay: AI servislarning obunalari narxga avtomatik kirmaydi, kursda imkon qadar qulay vositalar ko‘rsatiladi.</div>
+    </div>
+    <div class="card card-pad" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;font-size:14px;">3B. Tavsiya va Narx — PREMIUM (249 000 so‘m)</div>
+          <div class="text-faint" style="font-size:11px;">Instagram/Telegram uchun sifatli video, montaj va kurator xohlagan mijozga</div>
+        </div>
+        <button type="button" onclick="copyText(this, decodeURIComponent('Aytganlaringizga%20ko%E2%80%98ra%20sizga%20Premium%20tarifi%20mos%3A%2021%20kunlik%20dastur%2C%20AI%20video%20va%20montaj%2C%20kurator%20yordami%20va%20yangilanib%20boradigan%20bonus%20darslar%20bor.%20Standart%E2%80%99dagi%20barcha%20darslar%20ham%20kiradi.%20Kurator%20topshiriqlaringizni%20ko%E2%80%98rib%2C%20xatolarni%20ko%E2%80%98rsatib%20boradi%20%E2%80%94%20shuning%20uchun%20jarayonda%20yolg%E2%80%98iz%20qolmaysiz.%0A%0APremium%20narxi%20%E2%80%94%20249%20000%20so%E2%80%98m.%20Eslatib%20o%E2%80%98tay%3A%20AI%20servislarning%20obunalari%20narxga%20avtomatik%20kirmaydi%2C%20ayrim%20vositalar%20alohida%20pullik%20bo%E2%80%98lishi%20mumkin.'))" class="btn btn-outline" style="padding:6px 12px;font-size:12px;">
+          Nusxa olish
+        </button>
+      </div>
+      <div class="subtle-box" style="font-size:13px;white-space:pre-line;line-height:1.55;">Aytganlaringizga ko‘ra sizga Premium tarifi mos: 21 kunlik dastur, AI video va montaj, kurator yordami va yangilanib boradigan bonus darslar bor. Standart’dagi barcha darslar ham kiradi. Kurator topshiriqlaringizni ko‘rib, xatolarni ko‘rsatib boradi — shuning uchun jarayonda yolg‘iz qolmaysiz.
+
+Premium narxi — 249 000 so‘m. Eslatib o‘tay: AI servislarning obunalari narxga avtomatik kirmaydi, ayrim vositalar alohida pullik bo‘lishi mumkin.</div>
+    </div>
+    <div class="card card-pad" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;font-size:14px;">3C. Tavsiya va Narx — VIP (799 000 so‘m)</div>
+          <div class="text-faint" style="font-size:11px;">O‘z AI modeli, gapiruvchi avatar, professional dizayn va action video xohlagan mijozga</div>
+        </div>
+        <button type="button" onclick="copyText(this, decodeURIComponent('Aytganlaringizga%20ko%E2%80%98ra%20sizga%20VIP%20tarifi%20mos%3A%20unda%20Standart%20va%20Premium%E2%80%99dagi%20barcha%20imkoniyatlar%20(video%2C%20montaj%2C%20kurator%2C%20bonuslar)%20to%E2%80%98liq%20bor.%20Ustiga%20o%E2%80%98z%20AI%20modelingizni%20shakllantirish%2C%20gapiruvchi%20avatar%2C%20kadr%20fonini%20o%E2%80%98zgartirish%2C%20professional%20dizayn%20va%20action%20video%20darslari%20qo%E2%80%98shilgan.%0A%0AVIP%20narxi%20%E2%80%94%20799%20000%20so%E2%80%98m.%20Eslatib%20o%E2%80%98tay%3A%20AI%20servislarning%20obunalari%20narxga%20avtomatik%20kirmaydi%2C%20ayrim%20professional%20vositalar%20alohida%20to%E2%80%98lov%20talab%20qilishi%20mumkin.'))" class="btn btn-outline" style="padding:6px 12px;font-size:12px;">
+          Nusxa olish
+        </button>
+      </div>
+      <div class="subtle-box" style="font-size:13px;white-space:pre-line;line-height:1.55;">Aytganlaringizga ko‘ra sizga VIP tarifi mos: unda Standart va Premium’dagi barcha imkoniyatlar (video, montaj, kurator, bonuslar) to‘liq bor. Ustiga o‘z AI modelingizni shakllantirish, gapiruvchi avatar, kadr fonini o‘zgartirish, professional dizayn va action video darslari qo‘shilgan.
+
+VIP narxi — 799 000 so‘m. Eslatib o‘tay: AI servislarning obunalari narxga avtomatik kirmaydi, ayrim professional vositalar alohida to‘lov talab qilishi mumkin.</div>
+    </div>
+    <div class="card card-pad" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;font-size:14px;">3D. Tavsiya va Narx — INDIVIDUAL (1 899 000 so‘m)</div>
+          <div class="text-faint" style="font-size:11px;">AI + SMM + YouTube + Target va real loyiha tajribasini xohlagan mijozga</div>
+        </div>
+        <button type="button" onclick="copyText(this, decodeURIComponent('Aytganlaringizga%20ko%E2%80%98ra%20sizga%20Individual%20dastur%20mos%3A%20unda%20Standart%2C%20Premium%20va%20VIP%E2%80%99dagi%20barcha%20darslar%20bor.%20Qo%E2%80%98shimcha%20ravishda%20Instagram%20va%20Telegram%20SMM%2C%20YouTube%20va%20monetizatsiya%2C%20targetologiya%2C%20shaxsiy%20yondashuv%20(Online%20yoki%20Offline)%2C%20haftalik%20jonli%20uchrashuvlar%20hamda%20real%20mijoz%20keyslari%20bilan%20ishlash%20o%E2%80%98rgatiladi.%0A%0AIndividual%20narxi%20%E2%80%94%201%20899%20000%20so%E2%80%98m.%20Eslatib%20o%E2%80%98tay%3A%20kamida%201%20ta%20real%20buyurtma%20imkoniyati%20loyiha%20mavjudligi%20va%20jamoa%20shartlariga%20bog%E2%80%98liq%2C%20doimiy%20buyurtma%20kafolatlanmaydi.'))" class="btn btn-outline" style="padding:6px 12px;font-size:12px;">
+          Nusxa olish
+        </button>
+      </div>
+      <div class="subtle-box" style="font-size:13px;white-space:pre-line;line-height:1.55;">Aytganlaringizga ko‘ra sizga Individual dastur mos: unda Standart, Premium va VIP’dagi barcha darslar bor. Qo‘shimcha ravishda Instagram va Telegram SMM, YouTube va monetizatsiya, targetologiya, shaxsiy yondashuv (Online yoki Offline), haftalik jonli uchrashuvlar hamda real mijoz keyslari bilan ishlash o‘rgatiladi.
+
+Individual narxi — 1 899 000 so‘m. Eslatib o‘tay: kamida 1 ta real buyurtma imkoniyati loyiha mavjudligi va jamoa shartlariga bog‘liq, doimiy buyurtma kafolatlanmaydi.</div>
+    </div>
+    <div class="card card-pad" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;font-size:14px;">4. Yopish (CTA)</div>
+          <div class="text-faint" style="font-size:11px;">4-qoida: Har javob aniq CTA bilan tugaydi</div>
+        </div>
+        <button type="button" onclick="copyText(this, decodeURIComponent('Boshlash%20uchun%20ism-familiya%20va%20telefon%20raqamingizni%20tasdiqlasangiz%2C%20to%E2%80%98lov%20yo%E2%80%98riqnomasini%20jo%E2%80%98nataman.%20To%E2%80%98lov%20tasdiqlangach%2C%20kursga%20kirish%20yo%E2%80%98riqnomasi%20beriladi.%20Bugun%20yozilamizmi%3F'))" class="btn btn-outline" style="padding:6px 12px;font-size:12px;">
+          Nusxa olish
+        </button>
+      </div>
+      <div class="subtle-box" style="font-size:13px;white-space:pre-line;line-height:1.55;">Boshlash uchun ism-familiya va telefon raqamingizni tasdiqlasangiz, to‘lov yo‘riqnomasini jo‘nataman. To‘lov tasdiqlangach, kursga kirish yo‘riqnomasi beriladi. Bugun yozilamizmi?</div>
+    </div>
+    <div class="card card-pad" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;font-size:14px;">5. Follow-up — 24 soatdan keyin</div>
+          <div class="text-faint" style="font-size:11px;">Javob bermagan mijozga 1 sutkadan so‘ng yuboriladi</div>
+        </div>
+        <button type="button" onclick="copyText(this, decodeURIComponent('Assalomu%20alaykum!%20Kecha%20kurs%20bo%E2%80%98yicha%20gaplashgan%20edik.%20Tarif%20bo%E2%80%98yicha%20savollaringiz%20qoldimi%3F%20Yordam%20beraman.'))" class="btn btn-outline" style="padding:6px 12px;font-size:12px;">
+          Nusxa olish
+        </button>
+      </div>
+      <div class="subtle-box" style="font-size:13px;white-space:pre-line;line-height:1.55;">Assalomu alaykum! Kecha kurs bo‘yicha gaplashgan edik. Tarif bo‘yicha savollaringiz qoldimi? Yordam beraman.</div>
+    </div>
+    <div class="card card-pad" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;font-size:14px;">6. Follow-up — 3-kun</div>
+          <div class="text-faint" style="font-size:11px;">Faqat haqiqatan yangi guruh boshlanayotgan bo‘lsa ishlating</div>
+        </div>
+        <button type="button" onclick="copyText(this, decodeURIComponent('Assalomu%20alaykum!%20Bu%20hafta%20yangi%20guruh%20boshlanyapti.%20O%E2%80%98rningizni%20band%20qilib%20qo%E2%80%98yaymi%3F%20Shunchaki%20%E2%80%9Cha%E2%80%9D%20deb%20yozing.'))" class="btn btn-outline" style="padding:6px 12px;font-size:12px;">
+          Nusxa olish
+        </button>
+      </div>
+      <div class="subtle-box" style="font-size:13px;white-space:pre-line;line-height:1.55;">Assalomu alaykum! Bu hafta yangi guruh boshlanyapti. O‘rningizni band qilib qo‘yaymi? Shunchaki “ha” deb yozing.</div>
+    </div>
+          </div>
+          <div>
+            <span class="kicker">E’TIROZLAR BILAN ISHLASH (8 TA HOLAT)</span>
+            <h2 class="h2" style="font-size:24px;margin-bottom:14px;">Mijoz ikkilanganda tayyor javoblar</h2>
+            
+    <details class="faq-item">
+      <summary>
+        <span>“Qimmat” — <span class="text-faint" style="font-weight:400;font-size:12px;">Narxi qimmat ekan / Arzonrog‘i bormi?</span></span>
+        <span class="mono accent-text">+</span>
+      </summary>
+      <p>Tushunaman. Agar AI rasm, video, montaj va kontent yo‘nalishlarini alohida-alohida kurslarda o‘rganilsa, ancha ko‘proq vaqt va mablag‘ ketadi — biz bularni bitta amaliy tizimga jamlaganmiz. Agar hozir kamroq xarajat bilan boshlamoqchi bo‘lsangiz, 149 000 so‘mlik Standart tarifdan boshlashingiz mumkin. Qaysi biri sizga qulayroq — Standart’ga yozilamizmi?</p>
+      <div style="margin-top:8px;text-align:right;">
+        <button type="button" onclick="copyText(this, decodeURIComponent('Tushunaman.%20Agar%20AI%20rasm%2C%20video%2C%20montaj%20va%20kontent%20yo%E2%80%98nalishlarini%20alohida-alohida%20kurslarda%20o%E2%80%98rganilsa%2C%20ancha%20ko%E2%80%98proq%20vaqt%20va%20mablag%E2%80%98%20ketadi%20%E2%80%94%20biz%20bularni%20bitta%20amaliy%20tizimga%20jamlaganmiz.%20Agar%20hozir%20kamroq%20xarajat%20bilan%20boshlamoqchi%20bo%E2%80%98lsangiz%2C%20149%20000%20so%E2%80%98mlik%20Standart%20tarifdan%20boshlashingiz%20mumkin.%20Qaysi%20biri%20sizga%20qulayroq%20%E2%80%94%20Standart%E2%80%99ga%20yozilamizmi%3F'))" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">
+          Javobdan nusxa olish
+        </button>
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>
+        <span>“Vaqtim yo‘q” — <span class="text-faint" style="font-weight:400;font-size:12px;">Ishda bo‘laman, ulgurolmayman deb qo‘rqaman.</span></span>
+        <span class="mono accent-text">+</span>
+      </summary>
+      <p>Darslar online formatda va yozuvlari saqlanadi — aniq bir soatda kirish majburiy emas. Kuniga 30–40 daqiqa o‘zingizga qulay vaqtda ko‘rib, amaliyot qilsangiz yetarli bo‘ladi. Ko‘p mashg‘ulotlar telefonda ham tez bajariladi. Ma’lumotlaringizni yuborsangiz, to‘lov yo‘riqnomasini jo‘nataman, bugun boshlaymizmi?</p>
+      <div style="margin-top:8px;text-align:right;">
+        <button type="button" onclick="copyText(this, decodeURIComponent('Darslar%20online%20formatda%20va%20yozuvlari%20saqlanadi%20%E2%80%94%20aniq%20bir%20soatda%20kirish%20majburiy%20emas.%20Kuniga%2030%E2%80%9340%20daqiqa%20o%E2%80%98zingizga%20qulay%20vaqtda%20ko%E2%80%98rib%2C%20amaliyot%20qilsangiz%20yetarli%20bo%E2%80%98ladi.%20Ko%E2%80%98p%20mashg%E2%80%98ulotlar%20telefonda%20ham%20tez%20bajariladi.%20Ma%E2%80%99lumotlaringizni%20yuborsangiz%2C%20to%E2%80%98lov%20yo%E2%80%98riqnomasini%20jo%E2%80%98nataman%2C%20bugun%20boshlaymizmi%3F'))" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">
+          Javobdan nusxa olish
+        </button>
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>
+        <span>“AI’ni umuman bilmayman” — <span class="text-faint" style="font-weight:400;font-size:12px;">Oldin umuman ishlatmaganman, tushunib ketolamanmi?</span></span>
+        <span class="mono accent-text">+</span>
+      </summary>
+      <p>Kurs aynan AI’ni noldan boshlaganlar uchun tuzilgan. Murakkab texnik bilim kerak emas: 1-darsdan boshlab AI nima ekani va unga qanday topshiriq (prompt) berish oddiy tilda ko‘rsatiladi. Premium va yuqori tariflarda esa kurator ham bor — savollaringizga javob berib, yo‘naltirib boradi. Ma’lumotlaringizni yuborsangiz, to‘lov yo‘riqnomasini jo‘nataman.</p>
+      <div style="margin-top:8px;text-align:right;">
+        <button type="button" onclick="copyText(this, decodeURIComponent('Kurs%20aynan%20AI%E2%80%99ni%20noldan%20boshlaganlar%20uchun%20tuzilgan.%20Murakkab%20texnik%20bilim%20kerak%20emas%3A%201-darsdan%20boshlab%20AI%20nima%20ekani%20va%20unga%20qanday%20topshiriq%20(prompt)%20berish%20oddiy%20tilda%20ko%E2%80%98rsatiladi.%20Premium%20va%20yuqori%20tariflarda%20esa%20kurator%20ham%20bor%20%E2%80%94%20savollaringizga%20javob%20berib%2C%20yo%E2%80%98naltirib%20boradi.%20Ma%E2%80%99lumotlaringizni%20yuborsangiz%2C%20to%E2%80%98lov%20yo%E2%80%98riqnomasini%20jo%E2%80%98nataman.'))" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">
+          Javobdan nusxa olish
+        </button>
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>
+        <span>“Kompyuterim yo‘q” — <span class="text-faint" style="font-weight:400;font-size:12px;">Faqat telefonim bor, kompyutersiz o‘qisa bo‘ladimi?</span></span>
+        <span class="mono accent-text">+</span>
+      </summary>
+      <p>Ha, bemalol boshlashingiz mumkin! Kursdagi ko‘plab amaliyotlar — prompt yozish, AI rasm tayyorlash, suratni jonlantirish va qisqa videolar to‘g‘ridan-to‘g‘ri telefonda bajariladi. Faqat murakkabroq professional montaj va dizayn jarayonlarida kompyuter qulayroq bo‘ladi. Telefon orqali boshlash uchun to‘lov yo‘riqnomasini yuboraymi?</p>
+      <div style="margin-top:8px;text-align:right;">
+        <button type="button" onclick="copyText(this, decodeURIComponent('Ha%2C%20bemalol%20boshlashingiz%20mumkin!%20Kursdagi%20ko%E2%80%98plab%20amaliyotlar%20%E2%80%94%20prompt%20yozish%2C%20AI%20rasm%20tayyorlash%2C%20suratni%20jonlantirish%20va%20qisqa%20videolar%20to%E2%80%98g%E2%80%98ridan-to%E2%80%98g%E2%80%98ri%20telefonda%20bajariladi.%20Faqat%20murakkabroq%20professional%20montaj%20va%20dizayn%20jarayonlarida%20kompyuter%20qulayroq%20bo%E2%80%98ladi.%20Telefon%20orqali%20boshlash%20uchun%20to%E2%80%98lov%20yo%E2%80%98riqnomasini%20yuboraymi%3F'))" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">
+          Javobdan nusxa olish
+        </button>
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>
+        <span>“Sertifikat beriladimi?” — <span class="text-faint" style="font-weight:400;font-size:12px;">Kursni tugatsam sertifikat yoki diplom berasizlarmi?</span></span>
+        <span class="mono accent-text">+</span>
+      </summary>
+      <p>Ochig‘ini aytamiz: bizda sertifikat berilmaydi. Sababi hozirgi kunda hech kim qog‘oz sertifikatga qaramaydi — asosiy e’tibor real bilim, amaliy ko‘nikma va o‘zingiz tayyorlagan kontentga qaratiladi. Kurs yakunida qo‘lingizda o‘zingiz tayyorlagan AI loyihalar qoladi. Ma’lumotlaringizni yuborsangiz, to‘lov yo‘riqnomasini jo‘nataman.</p>
+      <div style="margin-top:8px;text-align:right;">
+        <button type="button" onclick="copyText(this, decodeURIComponent('Ochig%E2%80%98ini%20aytamiz%3A%20bizda%20sertifikat%20berilmaydi.%20Sababi%20hozirgi%20kunda%20hech%20kim%20qog%E2%80%98oz%20sertifikatga%20qaramaydi%20%E2%80%94%20asosiy%20e%E2%80%99tibor%20real%20bilim%2C%20amaliy%20ko%E2%80%98nikma%20va%20o%E2%80%98zingiz%20tayyorlagan%20kontentga%20qaratiladi.%20Kurs%20yakunida%20qo%E2%80%98lingizda%20o%E2%80%98zingiz%20tayyorlagan%20AI%20loyihalar%20qoladi.%20Ma%E2%80%99lumotlaringizni%20yuborsangiz%2C%20to%E2%80%98lov%20yo%E2%80%98riqnomasini%20jo%E2%80%98nataman.'))" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">
+          Javobdan nusxa olish
+        </button>
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>
+        <span>“Pul ishlash mumkinmi?” — <span class="text-faint" style="font-weight:400;font-size:12px;">Kursdan keyin qancha pul ishlay olaman? Kafolat bormi?</span></span>
+        <span class="mono accent-text">+</span>
+      </summary>
+      <p>Biz aniq daromad summasini kafolatlamaymiz — chunki natija sizning ko‘nikmangiz, amaliyotingiz va bozor sharoitiga bog‘liq. Lekin siz Instagram/Telegram kontent, AI video, reklama vizuallari kabi real xizmat ko‘rsata oladigan amaliy hunarni o‘rganasiz. Agar SMM, YouTube monetizatsiya, target va real mijoz keyslari ham kerak bo‘lsa, Individual tarifimiz aynan shunga yo‘naltirilgan. Qaysi tarifdan boshlaymiz?</p>
+      <div style="margin-top:8px;text-align:right;">
+        <button type="button" onclick="copyText(this, decodeURIComponent('Biz%20aniq%20daromad%20summasini%20kafolatlamaymiz%20%E2%80%94%20chunki%20natija%20sizning%20ko%E2%80%98nikmangiz%2C%20amaliyotingiz%20va%20bozor%20sharoitiga%20bog%E2%80%98liq.%20Lekin%20siz%20Instagram%2FTelegram%20kontent%2C%20AI%20video%2C%20reklama%20vizuallari%20kabi%20real%20xizmat%20ko%E2%80%98rsata%20oladigan%20amaliy%20hunarni%20o%E2%80%98rganasiz.%20Agar%20SMM%2C%20YouTube%20monetizatsiya%2C%20target%20va%20real%20mijoz%20keyslari%20ham%20kerak%20bo%E2%80%98lsa%2C%20Individual%20tarifimiz%20aynan%20shunga%20yo%E2%80%98naltirilgan.%20Qaysi%20tarifdan%20boshlaymiz%3F'))" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">
+          Javobdan nusxa olish
+        </button>
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>
+        <span>“O‘ylab ko‘raman” — <span class="text-faint" style="font-weight:400;font-size:12px;">Yaxshi, men bir o‘ylab ko‘ray / maslahatlashib ko‘ray.</span></span>
+        <span class="mono accent-text">+</span>
+      </summary>
+      <p>Albatta! To‘g‘ri qaror qabul qilishingiz uchun bir narsani aniqlashtirsam maylimi: ko‘proq dastur mazmuni bo‘yicha savolingiz qoldimi yoki tarif tanlashda ikkilanyapsizmi? Xohlasangiz, hozir ism va telefon raqamingizni yozib o‘rningizni band qilib qo‘yaman.</p>
+      <div style="margin-top:8px;text-align:right;">
+        <button type="button" onclick="copyText(this, decodeURIComponent('Albatta!%20To%E2%80%98g%E2%80%98ri%20qaror%20qabul%20qilishingiz%20uchun%20bir%20narsani%20aniqlashtirsam%20maylimi%3A%20ko%E2%80%98proq%20dastur%20mazmuni%20bo%E2%80%98yicha%20savolingiz%20qoldimi%20yoki%20tarif%20tanlashda%20ikkilanyapsizmi%3F%20Xohlasangiz%2C%20hozir%20ism%20va%20telefon%20raqamingizni%20yozib%20o%E2%80%98rningizni%20band%20qilib%20qo%E2%80%98yaman.'))" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">
+          Javobdan nusxa olish
+        </button>
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary>
+        <span>“Obunalar ham pullikmi?” — <span class="text-faint" style="font-weight:400;font-size:12px;">AI dasturlar uchun yana alohida pul to‘laymanmi?</span></span>
+        <span class="mono accent-text">+</span>
+      </summary>
+      <p>Barcha AI servislarning obunalari kurs narxiga avtomatik kirmaydi. Darslarda imkon qadar bepul limitlari bor va qulay vositalar ko‘rsatiladi, shuning uchun boshlashda qiynalmaysiz. Keyinchalik professional hajmda ishlaganda ayrim vositalar alohida obuna talab qilishi mumkin. Boshlash uchun ma’lumotlaringizni yuborsangiz, to‘lov yo‘riqnomasini jo‘nataman.</p>
+      <div style="margin-top:8px;text-align:right;">
+        <button type="button" onclick="copyText(this, decodeURIComponent('Barcha%20AI%20servislarning%20obunalari%20kurs%20narxiga%20avtomatik%20kirmaydi.%20Darslarda%20imkon%20qadar%20bepul%20limitlari%20bor%20va%20qulay%20vositalar%20ko%E2%80%98rsatiladi%2C%20shuning%20uchun%20boshlashda%20qiynalmaysiz.%20Keyinchalik%20professional%20hajmda%20ishlaganda%20ayrim%20vositalar%20alohida%20obuna%20talab%20qilishi%20mumkin.%20Boshlash%20uchun%20ma%E2%80%99lumotlaringizni%20yuborsangiz%2C%20to%E2%80%98lov%20yo%E2%80%98riqnomasini%20jo%E2%80%98nataman.'))" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">
+          Javobdan nusxa olish
+        </button>
+      </div>
+    </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. CRM TABLE -->
+      <section id="crm" class="section" style="border-bottom:none;">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
+          <div>
+            <span class="kicker">MIJOZLAR BAZASI VA SOTUV VORONKASI (CRM)</span>
+            <h2 class="h2" style="font-size:24px;margin:0;">Sana va vaqt ketma-ketligidagi mijozlar ro‘yxati</h2>
+          </div>
+          <div class="btn-row mono" style="font-size:12px;">
+            <span class="live-indicator"><span class="live-dot"></span> LIVE CRM</span>
+            <span class="btn btn-outline">Jami: <strong id="statTotal">0</strong></span>
+            <span class="btn btn-outline" style="color:#059669;">Sotuv: <strong id="statSotuv">0</strong></span>
+            <span class="btn btn-outline" style="color:#D97706;">Jarayonda: <strong id="statJarayon">0</strong></span>
+            <span class="btn btn-outline" style="color:var(--danger-text);">Bo‘lmadi: <strong id="statBolmadi">0</strong></span>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Sana va vaqt</th>
+                <th>Mijoz va Telefon</th>
+                <th>Tarif</th>
+                <th>Holati (Aloqa)</th>
+                <th>Natija (Sotuv)</th>
+                <th>Izoh (Qo‘lda yozish)</th>
+                <th>Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="crmBody">
+              <tr>
+                <td colspan="8" style="text-align:center;padding:50px 16px;color:var(--text-muted);">
+                  <div style="font-size:36px;margin-bottom:10px;">📥</div>
+                  <div style="font-size:16px;font-weight:700;color:var(--text-main);">Hozircha yangi arizalar mavjud emas</div>
+                  <div style="font-size:13px;margin-top:6px;max-width:480px;margin-left:auto;margin-right:auto;">Mijozlar sahifasidan ro‘yxatdan o‘tganda yangi arizalar avtomatik ravishda (0 soniyada) ovozli signal bilan shu yerda paydo bo‘ladi.</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  
+  
+  <script>
+    var TARIFFS = [
+      { id: "standart", name: "Standart", priceFormatted: "149 000 so‘m" },
+      { id: "premium", name: "Premium", priceFormatted: "249 000 so‘m" },
+      { id: "vip", name: "VIP", priceFormatted: "799 000 so‘m" },
+      { id: "individual", name: "Individual", priceFormatted: "1 899 000 so‘m" }
+    ];
+
+    var allLeads = [];
+    var THEME_STORAGE_KEY = 'ai_segment_theme_v1';
+    var debounceTimers = {};
+
+    function syncThemeFromCheckbox(checked) {
+      if (checked) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      try { localStorage.setItem(THEME_STORAGE_KEY, checked ? 'dark' : 'light'); } catch(e) {}
+    }
+
+    function playNotificationChime() {
+      try {
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        var ctx = new AudioCtx();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+      } catch(e) {}
+    }
+
+    function showToast(title, body) {
+      var container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+      var toast = document.createElement('div');
+      toast.className = 'toast-msg';
+      toast.innerHTML = '<span style="font-size:18px;">🔔</span><div><strong style="color:#34D399;display:block;">' + title + '</strong><span style="font-size:12px;">' + body + '</span></div>';
+      container.appendChild(toast);
+      setTimeout(function() {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.4s';
+        setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 400);
+      }, 5000);
+    }
+
+    function copyText(btn, text) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+      }
+      var old = btn.textContent;
+      btn.textContent = 'Nusxa olindi ✓';
+      setTimeout(function() { btn.textContent = old; }, 1400);
+    }
+
+    function updateStats(leads) {
+      var total = leads.length;
+      var sotuv = leads.filter(function(l) { return l.result === 'sotuv'; }).length;
+      var bolmadi = leads.filter(function(l) { return l.result === 'sotuv_bolmadi'; }).length;
+      var jarayonda = leads.filter(function(l) { return (l.result || 'kutilmoqda') === 'kutilmoqda'; }).length;
+
+      var stTotal = document.getElementById('statTotal');
+      if (stTotal) stTotal.textContent = total;
+      var topCount = document.getElementById('topCrmCount');
+      if (topCount) topCount.textContent = total;
+
+      var stSotuv = document.getElementById('statSotuv');
+      if (stSotuv) stSotuv.textContent = sotuv;
+
+      var stBolmadi = document.getElementById('statBolmadi');
+      if (stBolmadi) stBolmadi.textContent = bolmadi;
+
+      var stJarayon = document.getElementById('statJarayon');
+      if (stJarayon) stJarayon.textContent = jarayonda;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function renderCrm(newLeadId) {
+      updateStats(allLeads);
+      var tbody = document.getElementById('crmBody');
+      if (!tbody) return;
+
+      if (allLeads.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:50px 16px;color:var(--text-muted);">' +
+          '<div style="font-size:36px;margin-bottom:10px;">📥</div>' +
+          '<div style="font-size:16px;font-weight:700;color:var(--text-main);">Hozircha yangi arizalar mavjud emas</div>' +
+          '<div style="font-size:13px;margin-top:6px;max-width:480px;margin-left:auto;margin-right:auto;">Mijozlar sahifasidan ro‘yxatdan o‘tganda yangi arizalar avtomatik ravishda (0 soniyada) ovozli signal bilan shu yerda paydo bo‘ladi.</div>' +
+          '</td></tr>';
+        return;
+      }
+
+      var html = '';
+      for (var i = 0; i < allLeads.length; i++) {
+        var l = allLeads[i];
+        var isNew = (newLeadId && l.id === newLeadId) || (Date.now() - (l.timestamp || 0) < 60000);
+        var cleanPhone = (l.phone || '').replace(/[^0-9+]/g, '');
+
+        var tariffOpts = TARIFFS.map(function(t) {
+          var sel = (l.recommendedTariff === t.id) ? ' selected' : '';
+          return '<option value="' + t.id + '"' + sel + '>' + t.name + ' (' + t.priceFormatted + ')</option>';
+        }).join('');
+
+        var statusOpts = [
+          { val: 'yangi', label: 'Yangi' },
+          { val: 'gaplashildi', label: 'Gaplashildi' },
+          { val: 'oylab_koradi', label: 'O‘ylab ko‘radi' },
+          { val: 'tolov_kutilmoqda', label: 'To‘lov kutilmoqda' },
+          { val: 'qayta_aloqa', label: 'Qayta aloqa' }
+        ].map(function(s) {
+          var sel = (l.status === s.val) ? ' selected' : '';
+          return '<option value="' + s.val + '"' + sel + '>' + s.label + '</option>';
+        }).join('');
+
+        var resultOpts = [
+          { val: 'kutilmoqda', label: 'Jarayonda (—)' },
+          { val: 'sotuv', label: 'Sotuv ✓' },
+          { val: 'sotuv_bolmadi', label: 'Sotuv bo‘lmadi ✕' }
+        ].map(function(r) {
+          var sel = ((l.result || 'kutilmoqda') === r.val) ? ' selected' : '';
+          return '<option value="' + r.val + '"' + sel + '>' + r.label + '</option>';
+        }).join('');
+
+        html += '<tr class="' + (isNew ? 'row-new' : '') + '">' +
+          '<td class="mono text-faint">' + (i + 1) + '</td>' +
+          '<td class="mono" style="white-space:nowrap;font-size:12px;">' + (l.createdAt || '') + '</td>' +
+          '<td>' +
+            '<div style="display:flex;align-items:center;gap:4px;">' +
+              '<span style="font-weight:700;font-size:14px;">' + escapeHtml(l.name) + '</span>' +
+              (isNew ? '<span class="badge-new">YANGI</span>' : '') +
+            '</div>' +
+            '<div class="mono text-muted" style="font-size:12px;margin-top:2px;">' + escapeHtml(l.phone) + '</div>' +
+            '<div style="margin-top:4px;">' +
+              (cleanPhone ? '<a href="tel:' + cleanPhone + '" class="btn-call">📞 Qo‘ng‘iroq</a>' : '') +
+              '<button type="button" class="btn btn-outline lead-copy-btn" style="padding:2px 7px;font-size:11px;" data-phone="' + escapeHtml(l.phone) + '">Nusxa</button>' +
+            '</div>' +
+          '</td>' +
+          '<td>' +
+            '<select class="select lead-field" data-id="' + l.id + '" data-field="recommendedTariff" style="min-width:145px;">' +
+              tariffOpts +
+            '</select>' +
+          '</td>' +
+          '<td>' +
+            '<select class="select lead-field" data-id="' + l.id + '" data-field="status" style="min-width:130px;">' +
+              statusOpts +
+            '</select>' +
+          '</td>' +
+          '<td>' +
+            '<select class="select lead-field" data-id="' + l.id + '" data-field="result" style="min-width:135px;font-weight:700;">' +
+              resultOpts +
+            '</select>' +
+          '</td>' +
+          '<td>' +
+            '<input type="text" class="input lead-notes" data-id="' + l.id + '" style="min-width:180px;font-size:12px;" value="' + escapeHtml(l.notes || '') + '" placeholder="Qo‘lda izoh yozing..." />' +
+          '</td>' +
+          '<td style="text-align:center;">' +
+            '<button type="button" class="btn-del lead-del-btn" data-id="' + l.id + '" title="Arizani o‘chirish">🗑️ O‘chirish</button>' +
+          '</td>' +
+        '</tr>';
+      }
+
+      tbody.innerHTML = html;
+    }
+
+    async function loadLeadsFromServer() {
+      try {
+        var res = await fetch('/api/leads?_t=' + Date.now());
+        if (res.ok) {
+          var data = await res.json();
+          if (Array.isArray(data.leads)) {
+            allLeads = data.leads;
+            renderCrm();
+          }
+        }
+      } catch(e) {
+        console.warn('Serverdan leadlarni yuklashda xatolik:', e);
+      }
+    }
+
+    async function updateLeadField(id, field, val) {
+      var item = allLeads.find(function(l) { return l.id === id; });
+      if (item) {
+        item[field] = val;
+        updateStats(allLeads);
+      }
+      try {
+        var body = {};
+        body[field] = val;
+        await fetch('/api/leads/' + encodeURIComponent(id), {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      } catch(e) {
+        console.error('Maydonni saqlashda xatolik:', e);
+      }
+    }
+
+    function debounceUpdateNotes(id, val) {
+      if (debounceTimers[id]) clearTimeout(debounceTimers[id]);
+      debounceTimers[id] = setTimeout(function() {
+        updateLeadField(id, 'notes', val);
+      }, 400);
+    }
+
+    async function deleteLead(id) {
+      if (!confirm('Rostdan ham ushbu mijoz arizasini o‘chirmoqchimisiz?')) return;
+      allLeads = allLeads.filter(function(l) { return l.id !== id; });
+      renderCrm();
+      try {
+        await fetch('/api/leads/' + encodeURIComponent(id), { method: 'DELETE' });
+      } catch(e) {
+        console.error('Leadni o‘chirishda xatolik:', e);
+      }
+    }
+
+    // Event delegation for table inputs, selects, and buttons
+    function attachTableDelegation() {
+      var tbody = document.getElementById('crmBody');
+      if (!tbody) return;
+
+      tbody.addEventListener('change', function(e) {
+        var target = e.target;
+        if (target && target.classList.contains('lead-field')) {
+          var id = target.getAttribute('data-id');
+          var field = target.getAttribute('data-field');
+          updateLeadField(id, field, target.value);
+        }
+      });
+
+      tbody.addEventListener('input', function(e) {
+        var target = e.target;
+        if (target && target.classList.contains('lead-notes')) {
+          var id = target.getAttribute('data-id');
+          debounceUpdateNotes(id, target.value);
+        }
+      });
+
+      tbody.addEventListener('click', function(e) {
+        var delBtn = e.target.closest('.lead-del-btn');
+        if (delBtn) {
+          var id = delBtn.getAttribute('data-id');
+          deleteLead(id);
+          return;
+        }
+
+        var copyBtn = e.target.closest('.lead-copy-btn');
+        if (copyBtn) {
+          var phone = copyBtn.getAttribute('data-phone');
+          copyText(copyBtn, phone);
+          return;
+        }
+      });
+    }
+
+    // Connect Real-Time SSE
+    function connectEvents() {
+      if (typeof EventSource === 'undefined') return;
+      try {
+        var es = new EventSource('/api/events');
+        es.addEventListener('new_lead', function(e) {
+          try {
+            var lead = JSON.parse(e.data);
+            if (lead && lead.id) {
+              var exists = allLeads.some(function(x) { return x.id === lead.id; });
+              if (!exists) {
+                allLeads.unshift(lead);
+                playNotificationChime();
+                showToast('Yangi mijoz ro‘yxatdan o‘tdi!', lead.name + ' (' + lead.phone + ')');
+                renderCrm(lead.id);
+              }
+            }
+          } catch(err) {}
+        });
+
+        es.addEventListener('update_lead', function(e) {
+          try {
+            var lead = JSON.parse(e.data);
+            if (lead && lead.id) {
+              var idx = allLeads.findIndex(function(x) { return x.id === lead.id; });
+              if (idx !== -1) {
+                allLeads[idx] = lead;
+                renderCrm();
+              }
+            }
+          } catch(err) {}
+        });
+
+        es.addEventListener('delete_lead', function(e) {
+          try {
+            var data = JSON.parse(e.data);
+            if (data && data.id) {
+              allLeads = allLeads.filter(function(x) { return x.id !== data.id; });
+              renderCrm();
+            }
+          } catch(err) {}
+        });
+
+        es.onerror = function() {};
+      } catch(e) {}
+    }
+
+    // Local BroadcastChannel listener
+    if (typeof BroadcastChannel !== 'undefined') {
+      var bc = new BroadcastChannel('ai_segment_crm_channel');
+      bc.onmessage = function(ev) {
+        if (ev.data && ev.data.type === 'CRM_NEW_LEAD' && ev.data.lead) {
+          var lead = ev.data.lead;
+          var exists = allLeads.some(function(x) { return x.id === lead.id; });
+          if (!exists) {
+            allLeads.unshift(lead);
+            playNotificationChime();
+            showToast('Yangi mijoz ro‘yxatdan o‘tdi!', lead.name + ' (' + lead.phone + ')');
+            renderCrm(lead.id);
+          }
+        }
+      };
+    }
+
+    try {
+      if (localStorage.getItem(THEME_STORAGE_KEY) === 'dark') {
+        document.documentElement.classList.add('dark');
+        var tcb = document.getElementById('theme-toggle');
+        if (tcb) tcb.checked = true;
+      }
+    } catch(e) {}
+
+    attachTableDelegation();
+    loadLeadsFromServer();
+    connectEvents();
+    setInterval(loadLeadsFromServer, 3000);
+  </script>
+
+</body>
+</html>
