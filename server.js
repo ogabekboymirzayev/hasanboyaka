@@ -2,34 +2,9 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { getLeads, saveLeads } = require('./lib/leadsDb');
 
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'leads.json');
-
-// Ensure leads.json exists
-if (!fs.existsSync(DB_FILE)) {
-  fs.writeFileSync(DB_FILE, JSON.stringify([], null, 2), 'utf-8');
-}
-
-function getLeads() {
-  try {
-    const raw = fs.readFileSync(DB_FILE, 'utf-8');
-    return JSON.parse(raw);
-  } catch (e) {
-    console.error('Error reading leads.json:', e);
-    return [];
-  }
-}
-
-function saveLeads(leads) {
-  try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(leads, null, 2), 'utf-8');
-    return true;
-  } catch (e) {
-    console.error('Error saving leads.json:', e);
-    return false;
-  }
-}
 
 // SSE (Server-Sent Events) clients
 const sseClients = new Set();
@@ -101,7 +76,7 @@ const MIME_TYPES = {
   '.webp': 'image/webp'
 };
 
-const server = http.createServer(async (req, res) => {
+const requestHandler = async (req, res) => {
   setCors(res);
 
   if (req.method === 'OPTIONS') {
@@ -228,15 +203,26 @@ const server = http.createServer(async (req, res) => {
       res.end(JSON.stringify({ success: true, lead: removed }));
       return;
     }
+
+    if (req.method === 'GET') {
+      if (index === -1) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Lead topilmadi' }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: true, lead: leads[index] }));
+      return;
+    }
   }
 
   // 4. HTML Routes & File Serving
   let filePath = '';
 
   if (pathname === '/' || pathname === '/mijoz' || pathname === '/client') {
-    filePath = path.join(__dirname, 'mijozlar.html');
+    filePath = path.join(__dirname, 'index.html');
     if (!fs.existsSync(filePath)) {
-      filePath = path.join(__dirname, 'ai-segment-mijozlar (5).html');
+      filePath = path.join(__dirname, 'mijozlar.html');
     }
   } else if (pathname === '/operator' || pathname === '/crm' || pathname === '/admin') {
     filePath = path.join(__dirname, 'operator.html');
@@ -258,19 +244,25 @@ const server = http.createServer(async (req, res) => {
 
   res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
   res.end('Sahifa topilmadi (404 Not Found)');
-});
+};
 
-server.listen(PORT, '0.0.0.0', () => {
-  const localIp = getLocalIpAddress();
-  console.log('====================================================');
-  console.log(`🚀 AI SEGMENT SERVER ISHQQA TUSHDI!`);
-  console.log(`----------------------------------------------------`);
-  console.log(`💻 KOMPYUTER UCHUN HAVOLALAR:`);
-  console.log(`   👉 Mijozlar paneli:   http://localhost:${PORT}/`);
-  console.log(`   👉 Operatorlar CRM:   http://localhost:${PORT}/operator`);
-  console.log(`----------------------------------------------------`);
-  console.log(`📱 TELEFON VA TARMOQDAGI QURILMALAR UCHUN:`);
-  console.log(`   👉 Mijozlar paneli:   http://${localIp}:${PORT}/`);
-  console.log(`   👉 Operatorlar CRM:   http://${localIp}:${PORT}/operator`);
-  console.log(`====================================================`);
-});
+const server = http.createServer(requestHandler);
+
+if (require.main === module) {
+  server.listen(PORT, '0.0.0.0', () => {
+    const localIp = getLocalIpAddress();
+    console.log('====================================================');
+    console.log(`🚀 AI SEGMENT SERVER ISHGA TUSHDI!`);
+    console.log(`----------------------------------------------------`);
+    console.log(`💻 KOMPYUTER UCHUN HAVOLALAR:`);
+    console.log(`   👉 Mijozlar paneli:   http://localhost:${PORT}/`);
+    console.log(`   👉 Operatorlar CRM:   http://localhost:${PORT}/operator`);
+    console.log(`----------------------------------------------------`);
+    console.log(`📱 TELEFON VA TARMOQDAGI QURILMALAR UCHUN:`);
+    console.log(`   👉 Mijozlar paneli:   http://${localIp}:${PORT}/`);
+    console.log(`   👉 Operatorlar CRM:   http://${localIp}:${PORT}/operator`);
+    console.log(`====================================================`);
+  });
+}
+
+module.exports = server;

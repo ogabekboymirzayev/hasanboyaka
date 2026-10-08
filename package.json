@@ -1,0 +1,20 @@
+{
+  "name": "ai-segment-crm",
+  "version": "1.0.0",
+  "description": "AI Segment mijozlar va operatorlar CRM tizimi",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "crm",
+    "ai-segment",
+    "lead-management"
+  ],
+  "author": "Ogabek Boymirzayev",
+  "license": "ISC"
+}

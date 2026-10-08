@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/operator", "destination": "/operator.html" },
+    { "source": "/crm", "destination": "/operator.html" },
+    { "source": "/admin", "destination": "/operator.html" },
+    { "source": "/mijoz", "destination": "/index.html" },
+    { "source": "/client", "destination": "/index.html" }
+  ]
+}
